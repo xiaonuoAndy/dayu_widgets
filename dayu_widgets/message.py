@@ -102,9 +102,27 @@ class MMessage(QWidget):
         self._pos_ani.start()
         self._opacity_ani.start()
 
+    @staticmethod
+    def get_in_dcc():
+        import pkgutil
+        if pkgutil.find_loader('maya'):
+            return True
+        elif pkgutil.find_loader('hou'):
+            return True
+        nuke_loader = pkgutil.find_loader('nuke')
+        if nuke_loader:
+            nuke_module = nuke_loader.load_module('nuke')
+            if nuke_module.env['studio']:
+                return True
+            else:
+                return True
+        else:
+            return False
+
     def _set_proper_position(self, parent):
         parent_geo = parent.geometry()
-        pos = parent_geo.topLeft() if parent.parent() is None else parent.mapToGlobal(
+        in_dcc = self.get_in_dcc()
+        pos = parent_geo.topLeft() if parent.parent() is None or in_dcc else parent.mapToGlobal(
             parent_geo.topLeft())
         offset = 0
         for child in parent.children():
